@@ -76,6 +76,7 @@ public class VehicleRoutingImporter extends AbstractTxtSolutionImporter<VehicleR
         private int capacity;
         private Map<Long, Location> locationMap;
         private List<Depot> depotList;
+        List<Integer> capacityList = new ArrayList<>(vehicleListSize);
 
         @Override
         public VehicleRoutingSolution readSolution() throws IOException {
@@ -377,9 +378,27 @@ public class VehicleRoutingImporter extends AbstractTxtSolutionImporter<VehicleR
                             + ") has a vehicleListSizeString (" + vehicleListSizeString + ") that is not a number.", e);
                 }
             }
+            readCapacityList();
             createVehicleList();
         }
-
+        
+        //Reads the capacities of each vehicle, 
+        //Todo make it so that if it doesnt have this it fails with the right error message
+        private void readCapacityList() throws IOException {
+        	readConstantLine("CAPACITY_SECTION");
+        	
+        	for (int i = 0; i < vehicleListSize; i++) {
+                String line = bufferedReader.readLine();
+                String[] lineTokens = splitBySpacesOrTabs(line.trim(), timewindowed ? 5 : 2);
+                long id = Long.parseLong(lineTokens[0]);
+                int capacityVehicle = Integer.parseInt(lineTokens[1]);
+                
+                    
+                capacityList.add(capacityVehicle);    
+        	}
+        	
+        }
+        
         private void createVehicleList() {
             List<Vehicle> vehicleList = new ArrayList<>(vehicleListSize);
             long id = 0;
@@ -387,6 +406,7 @@ public class VehicleRoutingImporter extends AbstractTxtSolutionImporter<VehicleR
                 Vehicle vehicle = new Vehicle();
                 vehicle.setId(id);
                 id++;
+                capacity = capacityList.get(i);
                 vehicle.setCapacity(capacity);
                 // Round robin the vehicles to a depot if there are multiple depots
                 vehicle.setDepot(depotList.get(i % depotList.size()));
