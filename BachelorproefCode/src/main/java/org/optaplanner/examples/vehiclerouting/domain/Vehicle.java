@@ -26,6 +26,7 @@ public class Vehicle extends AbstractPersistable implements Standstill {
 
     protected int capacity;
     protected Depot depot;
+    protected boolean needsCleaning;
 
     // Shadow variables
     protected Customer nextCustomer;

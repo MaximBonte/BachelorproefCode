@@ -37,6 +37,8 @@ public class Customer extends AbstractPersistable implements Standstill {
 
     protected Location location;
     protected int demand;
+    
+    protected boolean needsCleaning;
 
     // Planning variables: changes during planning, between score calculations.
     protected Standstill previousStandstill;
@@ -53,6 +55,19 @@ public class Customer extends AbstractPersistable implements Standstill {
         this.location = location;
         this.demand = demand;
     }
+    
+    public Location getCleaning() {
+    	return location;
+    }
+    
+    public void setCleaning(Location location) {
+        this.location = location;
+    }
+    
+    //change this to something like the price for cleaning
+    public long getAmountCleaning() {
+		return 10;
+	}
 
     @Override
     public Location getLocation() {

@@ -70,6 +70,20 @@ end
 
 
 // ############################################################################
+// Soft constraint for the amount cleaned, need to change this so that it calculates price per cleaning and amount of cleaning
+// more specifically the customer bla bla part needs to be so that it only activates when the cleaning is necessary
+// ############################################################################
+
+rule "amountCleaned"
+	when
+		$customer : Customer(previousStandstill != null, $distanceFromPreviousStandstill : distanceFromPreviousStandstill)
+	then
+		Vehicle vehicle = $customer.getVehicle();
+		scoreHolder.addSoftConstraintMatch(kcontext, - $customer.getAmountCleaning());
+end
+
+
+// ############################################################################
 // TimeWindowed: additional hard constraints
 // ############################################################################
 

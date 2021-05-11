@@ -33,7 +33,8 @@ public class VehicleRoutingConstraintProvider implements ConstraintProvider {
                 vehicleCapacity(factory),
                 distanceToPreviousStandstill(factory),
                 distanceFromLastCustomerToDepot(factory),
-                arrivalAfterDueTime(factory)
+                arrivalAfterDueTime(factory),
+                vehicleCleaning(factory)
         };
     }
 
@@ -49,6 +50,17 @@ public class VehicleRoutingConstraintProvider implements ConstraintProvider {
                         HardSoftLongScore.ONE_HARD,
                         (vehicle, demand) -> demand - vehicle.getCapacity());
     }
+    
+    // ************************************************************************
+    // soft constraints mvcrp
+    // ************************************************************************
+    
+    protected Constraint vehicleCleaning(ConstraintFactory factory) {
+		return factory.from(Customer.class)
+				.penalizeLong("vehicleCleaning",
+						HardSoftLongScore.ONE_SOFT,
+						Customer::getAmountCleaning);
+	}
 
     // ************************************************************************
     // Soft constraints
