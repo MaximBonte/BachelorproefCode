@@ -47,7 +47,7 @@ public class VehicleRoutingEasyScoreCalculator
             Standstill previousStandstill = customer.getPreviousStandstill();
             if (previousStandstill != null) {
                 Vehicle vehicle = customer.getVehicle();
-                vehicleDemandMap.put(vehicle, vehicleDemandMap.get(vehicle) + customer.getDemand());
+                vehicleDemandMap.put(vehicle, vehicleDemandMap.get(vehicle) + customer.getDemandTotal());
                 // Score constraint distanceToPreviousStandstill
                 softScore -= customer.getDistanceFromPreviousStandstill();
                 if (customer.getNextCustomer() == null) {

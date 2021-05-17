@@ -16,6 +16,8 @@
 
 package org.optaplanner.examples.vehiclerouting.domain.timewindowed;
 
+import java.util.List;
+
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
 import org.optaplanner.core.api.domain.variable.CustomShadowVariable;
 import org.optaplanner.core.api.domain.variable.PlanningVariableReference;
@@ -40,7 +42,7 @@ public class TimeWindowedCustomer extends Customer {
     public TimeWindowedCustomer() {
     }
 
-    public TimeWindowedCustomer(long id, Location location, int demand, long readyTime, long dueTime, long serviceDuration) {
+    public TimeWindowedCustomer(long id, Location location, List<Integer> demand, long readyTime, long dueTime, long serviceDuration) {
         super(id, location, demand);
         this.readyTime = readyTime;
         this.dueTime = dueTime;

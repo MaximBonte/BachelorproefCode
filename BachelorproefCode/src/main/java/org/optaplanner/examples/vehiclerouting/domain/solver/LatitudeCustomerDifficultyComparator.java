@@ -28,7 +28,7 @@ public class LatitudeCustomerDifficultyComparator implements Comparator<Customer
     private static final Comparator<Customer> COMPARATOR = Comparator
             .comparingDouble((Customer customer) -> customer.getLocation().getLatitude())
             .thenComparingDouble(customer -> customer.getLocation().getLongitude())
-            .thenComparingInt(Customer::getDemand)
+            .thenComparingInt(Customer::getDemandTotal)
             .thenComparingLong(Customer::getId);
 
     @Override

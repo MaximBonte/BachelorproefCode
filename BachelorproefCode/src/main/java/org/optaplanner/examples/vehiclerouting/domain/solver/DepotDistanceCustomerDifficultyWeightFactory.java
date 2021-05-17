@@ -46,7 +46,7 @@ public class DepotDistanceCustomerDifficultyWeightFactory
         private static final Comparator<DepotDistanceCustomerDifficultyWeight> COMPARATOR =
                 // Ascending (further from the depot are more difficult)
                 comparingLong((DepotDistanceCustomerDifficultyWeight weight) -> weight.depotRoundTripDistance)
-                        .thenComparingInt(weight -> weight.customer.getDemand())
+                        .thenComparingInt(weight -> weight.customer.getDemandTotal())
                         .thenComparingDouble(weight -> weight.customer.getLocation().getLatitude())
                         .thenComparingDouble(weight -> weight.customer.getLocation().getLongitude())
                         .thenComparing(weight -> weight.customer, comparingLong(Customer::getId));

@@ -16,6 +16,9 @@
 
 package org.optaplanner.examples.vehiclerouting.domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
 import org.optaplanner.core.api.domain.variable.AnchorShadowVariable;
 import org.optaplanner.core.api.domain.variable.PlanningVariable;
@@ -38,6 +41,7 @@ public class Customer extends AbstractPersistable implements Standstill {
     protected Location location;
     protected int demand;
     
+    protected List<Integer> demandArray;
     protected boolean needsCleaning;
 
     // Planning variables: changes during planning, between score calculations.
@@ -50,10 +54,10 @@ public class Customer extends AbstractPersistable implements Standstill {
     public Customer() {
     }
 
-    public Customer(long id, Location location, int demand) {
+    public Customer(long id, Location location, List<Integer> demand) {
         super(id);
         this.location = location;
-        this.demand = demand;
+        this.demandArray = demand;
     }
     
     public Location getCleaning() {
@@ -78,12 +82,31 @@ public class Customer extends AbstractPersistable implements Standstill {
         this.location = location;
     }
 
+    public List<Integer> getDemandArray() {
+        return demandArray;
+    }
+    
     public int getDemand() {
-        return demand;
+    	return getDemandTotal();
+    }
+    
+    //om de drl te omzeilen, kijk na of score klopt
+    public void setDemand(int demand) {
+    	List<Integer> list = new ArrayList<>();
+    	list.add(demand);
+    	setDemandArray(list);
+    	this.demand = demand;
+    }
+    
+    
+    
+    public int getDemandTotal() {
+    	int demandTotal = getDemandArray().stream().mapToInt(Integer::intValue).sum();
+    	return demandTotal;
     }
 
-    public void setDemand(int demand) {
-        this.demand = demand;
+    public void setDemandArray(List<Integer> randomList) {
+        this.demandArray = randomList;
     }
 
     @PlanningVariable(valueRangeProviderRefs = { "vehicleRange",

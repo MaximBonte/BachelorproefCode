@@ -293,16 +293,21 @@ public class VehicleRoutingImporter extends AbstractTxtSolutionImporter<VehicleR
         }
 
         private void readVrpWebCustomerList() throws IOException {
+        	int amountProducts = 4;
             readConstantLine("DEMAND_SECTION");
             depotList = new ArrayList<>(customerListSize);
             List<Customer> customerList = new ArrayList<>(customerListSize);
             for (int i = 0; i < customerListSize; i++) {
                 String line = bufferedReader.readLine();
-                String[] lineTokens = splitBySpacesOrTabs(line.trim(), timewindowed ? 5 : 2);
+                String[] lineTokens = splitBySpacesOrTabs(line.trim(), timewindowed ? 5 : amountProducts);
                 long id = Long.parseLong(lineTokens[0]);
-                int demand = Integer.parseInt(lineTokens[1]);
+                List<Integer> list = new ArrayList<>();
+                for(int y = 1; y < amountProducts; y++) {
+                	list.add(Integer.parseInt(lineTokens[y]));
+                }
+                int demandTotal = list.stream().mapToInt(Integer::intValue).sum();
                 // Depots have no demand
-                if (demand == 0) {
+                if (demandTotal == 0) {
                     Depot depot = timewindowed ? new TimeWindowedDepot() : new Depot();
                     depot.setId(id);
                     Location location = locationMap.get(id);
@@ -330,8 +335,8 @@ public class VehicleRoutingImporter extends AbstractTxtSolutionImporter<VehicleR
                         throw new IllegalArgumentException("The customer with id (" + id
                                 + ") has no location (" + location + ").");
                     }
-                    customer.setLocation(location);
-                    customer.setDemand(demand);
+                    customer.setLocation(location);                    
+                    customer.setDemandArray(list);
                     if (timewindowed) {
                         TimeWindowedCustomer timeWindowedCustomer = (TimeWindowedCustomer) customer;
                         timeWindowedCustomer.setReadyTime(Long.parseLong(lineTokens[2]));
@@ -447,7 +452,10 @@ public class VehicleRoutingImporter extends AbstractTxtSolutionImporter<VehicleR
                     customer.setId((long) i);
                     customer.setLocation(location);
                     int demand = Integer.parseInt(lineTokens[0]);
-                    customer.setDemand(demand);
+                    List<Integer> list = new ArrayList<>();
+                    //here
+                    list.add(demand);
+                    customer.setDemandArray(list);
                     // Notice that we leave the PlanningVariable properties on null
                     // Do not add a customer that has no demand
                     if (demand != 0) {
@@ -527,7 +535,10 @@ public class VehicleRoutingImporter extends AbstractTxtSolutionImporter<VehicleR
                     TimeWindowedCustomer customer = new TimeWindowedCustomer();
                     customer.setId(id);
                     customer.setLocation(location);
-                    customer.setDemand(demand);
+                    List<Integer> list = new ArrayList<>();
+                    //here
+                    list.add(demand);
+                    customer.setDemandArray(list);
                     customer.setReadyTime(readyTime);
                     // Score constraint arrivalAfterDueTimeAtDepot is a built-in hard constraint in VehicleRoutingImporter
                     long maximumDueTime = depot.getDueTime()

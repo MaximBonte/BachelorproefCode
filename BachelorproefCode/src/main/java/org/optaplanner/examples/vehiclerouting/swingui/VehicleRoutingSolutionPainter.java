@@ -24,6 +24,9 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.ImageIcon;
 
@@ -101,7 +104,9 @@ public class VehicleRoutingSolutionPainter {
             int y = translator.translateLatitudeToY(location.getLatitude());
             g.setColor(TangoColorFactory.ALUMINIUM_4);
             g.fillRect(x - 1, y - 1, 3, 3);
-            String demandString = Integer.toString(customer.getDemand());
+            //methode dat alles uit de list haalt
+            List<Integer> list = customer.getDemandArray();
+            String demandString = list.stream().map(Object::toString).collect(Collectors.joining(", "));
             g.drawString(demandString, x - (g.getFontMetrics().stringWidth(demandString) / 2), y - TEXT_SIZE / 2);
             if (customer instanceof TimeWindowedCustomer) {
                 TimeWindowedCustomer timeWindowedCustomer = (TimeWindowedCustomer) customer;
@@ -148,7 +153,7 @@ public class VehicleRoutingSolutionPainter {
             int load = 0;
             for (Customer customer : solution.getCustomerList()) {
                 if (customer.getPreviousStandstill() != null && customer.getVehicle() == vehicle) {
-                    load += customer.getDemand();
+                    load += customer.getDemandTotal();
                     Location previousLocation = customer.getPreviousStandstill().getLocation();
                     Location location = customer.getLocation();
                     translator.drawRoute(g, previousLocation.getLongitude(), previousLocation.getLatitude(),

@@ -17,6 +17,8 @@
 package org.optaplanner.examples.vehiclerouting.swingui;
 
 import java.awt.BorderLayout;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import javax.swing.JTabbedPane;
@@ -40,6 +42,7 @@ public class VehicleRoutingPanel extends SolutionPanel<VehicleRoutingSolution> {
 
     private Random demandRandom = new Random(37);
     private Long nextLocationId = null;
+    private List<Integer> randomList = new ArrayList<Integer>();
 
     public VehicleRoutingPanel() {
         setLayout(new BorderLayout());
@@ -131,7 +134,8 @@ public class VehicleRoutingPanel extends SolutionPanel<VehicleRoutingSolution> {
         newCustomer.setId(newLocation.getId());
         newCustomer.setLocation(newLocation);
         // Demand must not be 0
-        newCustomer.setDemand(demandRandom.nextInt(10) + 1);
+        randomList.add(demandRandom.nextInt(10) + 1);
+        newCustomer.setDemandArray(randomList);
         return newCustomer;
     }
 
