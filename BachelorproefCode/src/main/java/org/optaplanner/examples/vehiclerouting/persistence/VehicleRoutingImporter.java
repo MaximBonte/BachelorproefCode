@@ -176,7 +176,6 @@ public class VehicleRoutingImporter extends AbstractTxtSolutionImporter<VehicleR
                 throw new IllegalArgumentException("The edgeWeightType (" + edgeWeightType + ") is not supported.");
             }
             solution.setDistanceUnitOfMeasurement(readOptionalStringValue("EDGE_WEIGHT_UNIT_OF_MEASUREMENT *:", "distance"));
-            capacity = readIntegerValue("CAPACITY *:");
             productListSize = readIntegerValue("PRODUCTS *:");
         }
 

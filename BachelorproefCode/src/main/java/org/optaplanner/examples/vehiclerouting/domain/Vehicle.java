@@ -33,7 +33,6 @@ public class Vehicle extends AbstractPersistable implements Standstill {
 
     //protected int capacity;
     protected Depot depot;
-    protected boolean needsCleaning;
 
     protected List<Compartiment> compartimentsList = new ArrayList<>();
 
@@ -70,15 +69,6 @@ public class Vehicle extends AbstractPersistable implements Standstill {
     public int getAmountOfCompartiments() {
     	return compartimentsList.size();
     }
-        
-
-	public boolean isNeedsCleaning() {
-		return needsCleaning;
-	}
-
-	public void setNeedsCleaning(boolean needsCleaning) {
-		this.needsCleaning = needsCleaning;
-	}
 
 	public List<Compartiment> getCompartimentsList() {
 		return compartimentsList;

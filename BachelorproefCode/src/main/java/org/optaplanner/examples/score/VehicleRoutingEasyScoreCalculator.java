@@ -96,7 +96,7 @@ public class VehicleRoutingEasyScoreCalculator
                     			if(capacityOther-demand < capacity -demandOther) {
                     				System.out.println("Switched compartiments");
                     				entry.getKey().swapCompartiments(x,y);
-                    				solution.setAmountSwitched(solution.getAmountSwitched() + 1);                    				
+                    				solution.setAmountSwitched(solution.getAmountSwitched() + 1);
                     				if(vehicleCurrentAmountList.stream().mapToInt(Integer::intValue).sum() != 0) {
                     					List<Product> productList = solution.getProductList();
                     					//Score constraint cleaningCost
@@ -125,7 +125,7 @@ public class VehicleRoutingEasyScoreCalculator
         	}
         }
         
-        //Hard constraint if not everything is delivered
+        //Hard constraint: Elk product moet worden geleverd/opgehaald.
         int totalCustomers = 0;
         for (Customer customer : customerList) {
         	totalCustomers += customer.getDemandTotal();
@@ -135,7 +135,6 @@ public class VehicleRoutingEasyScoreCalculator
         for (Map.Entry<Vehicle, List<Integer>> entry : vehicleDemandMap.entrySet()) {
         	totalVehicles += entry.getValue().stream().mapToInt(Integer::intValue).sum();
         }
-        //hard constraint or soft?
         hardScore -= (totalCustomers - totalVehicles); 
 
         return HardSoftLongScore.of(hardScore, softScore);
