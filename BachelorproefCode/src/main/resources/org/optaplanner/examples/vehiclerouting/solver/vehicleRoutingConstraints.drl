@@ -24,6 +24,8 @@ import org.optaplanner.examples.vehiclerouting.domain.location.Location;
 import org.optaplanner.examples.vehiclerouting.domain.Vehicle;
 import org.optaplanner.examples.vehiclerouting.domain.VehicleRoutingSolution;
 import org.optaplanner.examples.vehiclerouting.domain.Customer;
+import org.optaplanner.examples.vehiclerouting.domain.Compartiment;
+import org.optaplanner.examples.vehiclerouting.domain.Product;
 import org.optaplanner.examples.vehiclerouting.domain.timewindowed.TimeWindowedDepot;
 import org.optaplanner.examples.vehiclerouting.domain.timewindowed.TimeWindowedVehicleRoutingSolution;
 import org.optaplanner.examples.vehiclerouting.domain.timewindowed.TimeWindowedCustomer
@@ -35,19 +37,33 @@ global HardSoftLongScoreHolder scoreHolder;
 // Hard constraints
 // ############################################################################
 
-rule "vehicleCapacity"
+//Klopt nog nie
+rule "vehicleCapacityNew"
     when
-        $vehicle : Vehicle($capacity : capacity)
+        $vehicle : Vehicle()
+        $compartimentSpecific : Compartiment(vehicle == $vehicle, $capacity : capacity)
         accumulate(
-            Customer(
-                vehicle == $vehicle,
-                $demand : demand);
+			Customer(vehicle == $vehicle, $demand : demand);
             $demandTotal : sum($demand);
             $demandTotal > $capacity
         )
     then
-        scoreHolder.addHardConstraintMatch(kcontext, $capacity - $demandTotal);
+        scoreHolder.addSoftConstraintMatch(kcontext, $demand);
 end
+
+//rule "vehicleCapacity"
+//    when
+//        $vehicle : Vehicle($compartimentsList : compartiments)
+//        accumulate(
+//            Customer(
+//                vehicle == $vehicle,
+//                $demand : demand);
+//            $demandTotal : sum($demand);
+//            $demandTotal > $vehicle.getSpecificCompartimentCapacity(0)
+//        )
+//    then
+//        scoreHolder.addHardConstraintMatch(kcontext, - $demandTotal);
+//end
 
 // ############################################################################
 // Soft constraints
@@ -80,6 +96,19 @@ rule "amountCleaned"
 	then
 		Vehicle vehicle = $customer.getVehicle();
 		scoreHolder.addSoftConstraintMatch(kcontext, - $customer.getAmountCleaning());
+end
+
+// ############################################################################
+// Hard constraint for the amount cleaned, need to change this so that it calculates price per cleaning and amount of cleaning
+// more specifically the customer bla bla part needs to be so that it only activates when the cleaning is necessary
+// ############################################################################
+// iets fout in de code wss waardoor datie niet wordt geaccepteerd als echte regel
+
+rule "cleaningAfterSwitch"
+    when
+        $product : Product()
+    then
+        scoreHolder.addHardConstraintMatch(kcontext, $product.getCleaningCost());
 end
 
 

@@ -381,7 +381,7 @@ public class SolverAndPersistenceFrame<Solution_> extends JFrame {
                 Thread.currentThread().interrupt();
                 throw new IllegalStateException("Solving was interrupted.", e);
             } catch (ExecutionException e) {
-                throw new IllegalStateException("Solving failed.", e.getCause());
+                //
             } finally {
                 setSolvingState(false);
                 resetScreen();

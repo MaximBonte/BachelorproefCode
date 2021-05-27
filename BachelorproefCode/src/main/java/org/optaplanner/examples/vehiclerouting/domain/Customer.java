@@ -41,8 +41,9 @@ public class Customer extends AbstractPersistable implements Standstill {
     protected Location location;
     protected int demand;
     
-    protected List<Integer> demandArray;
+    protected List<Integer> demandArray = new ArrayList<>();
     protected boolean needsCleaning;
+    
 
     // Planning variables: changes during planning, between score calculations.
     protected Standstill previousStandstill;
@@ -58,14 +59,6 @@ public class Customer extends AbstractPersistable implements Standstill {
         super(id);
         this.location = location;
         this.demandArray = demand;
-    }
-    
-    public Location getCleaning() {
-    	return location;
-    }
-    
-    public void setCleaning(Location location) {
-        this.location = location;
     }
     
     //change this to something like the price for cleaning
@@ -84,6 +77,10 @@ public class Customer extends AbstractPersistable implements Standstill {
 
     public List<Integer> getDemandArray() {
         return demandArray;
+    }
+    
+    public int getSpecificDemand(int i) {
+    	return demandArray.get(i);
     }
     
     public int getDemand() {

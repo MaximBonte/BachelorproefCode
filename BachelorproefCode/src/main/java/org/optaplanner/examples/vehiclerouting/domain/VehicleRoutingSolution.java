@@ -48,8 +48,12 @@ public class VehicleRoutingSolution extends AbstractPersistable {
     protected List<Location> locationList;
     protected List<Depot> depotList;
     protected List<Vehicle> vehicleList;
+    
+    int amountSwitched = 0;
 
     protected List<Customer> customerList;
+    
+    protected List<Product> productList;
 
     @XStreamConverter(HardSoftLongScoreXStreamConverter.class)
     protected HardSoftLongScore score;
@@ -61,8 +65,18 @@ public class VehicleRoutingSolution extends AbstractPersistable {
     public void setName(String name) {
         this.name = name;
     }
+    
+    
 
-    public DistanceType getDistanceType() {
+    public int getAmountSwitched() {
+		return amountSwitched;
+	}
+
+	public void setAmountSwitched(int amountSwitched) {
+		this.amountSwitched = amountSwitched;
+	}
+
+	public DistanceType getDistanceType() {
         return distanceType;
     }
 
@@ -87,7 +101,7 @@ public class VehicleRoutingSolution extends AbstractPersistable {
         this.locationList = locationList;
     }
 
-    @ProblemFactCollectionProperty
+	@ProblemFactCollectionProperty
     public List<Depot> getDepotList() {
         return depotList;
     }
@@ -114,6 +128,14 @@ public class VehicleRoutingSolution extends AbstractPersistable {
 
     public void setCustomerList(List<Customer> customerList) {
         this.customerList = customerList;
+    }
+    
+    public List<Product> getProductList() {
+        return productList;
+    }
+
+    public void setProductList(List<Product> productList) {
+        this.productList = productList;
     }
 
     @PlanningScore

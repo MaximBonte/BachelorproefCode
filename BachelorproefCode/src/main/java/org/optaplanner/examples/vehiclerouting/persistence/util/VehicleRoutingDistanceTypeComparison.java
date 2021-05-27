@@ -110,6 +110,7 @@ public class VehicleRoutingDistanceTypeComparison extends LoggingMain {
             inputCustomer.setNextCustomer(varNext == null ? null : inputCustomerMap.get(varNext.getId()));
         }
         scoreManager.updateScore(inputSolution);
+        //inputSolution.setVehicleList(inputSolution.getVehicleList());
     }
 
 }

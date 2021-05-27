@@ -19,6 +19,7 @@ package org.optaplanner.examples.vehiclerouting.persistence;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +28,10 @@ import org.apache.commons.io.FilenameUtils;
 import org.optaplanner.examples.common.persistence.AbstractTxtSolutionImporter;
 import org.optaplanner.examples.common.persistence.SolutionConverter;
 import org.optaplanner.examples.vehiclerouting.app.VehicleRoutingApp;
+import org.optaplanner.examples.vehiclerouting.domain.Compartiment;
 import org.optaplanner.examples.vehiclerouting.domain.Customer;
 import org.optaplanner.examples.vehiclerouting.domain.Depot;
+import org.optaplanner.examples.vehiclerouting.domain.Product;
 import org.optaplanner.examples.vehiclerouting.domain.Vehicle;
 import org.optaplanner.examples.vehiclerouting.domain.VehicleRoutingSolution;
 import org.optaplanner.examples.vehiclerouting.domain.location.AirLocation;
@@ -72,11 +75,15 @@ public class VehicleRoutingImporter extends AbstractTxtSolutionImporter<VehicleR
 
         private boolean timewindowed;
         private int customerListSize;
+        private int productListSize;
         private int vehicleListSize;
         private int capacity;
+        private int compartiments;
         private Map<Long, Location> locationMap;
         private List<Depot> depotList;
+        private List<Product> productList;
         List<Integer> capacityList = new ArrayList<>(vehicleListSize);
+        List<Integer> compartimentsList = new ArrayList<>(vehicleListSize);
 
         @Override
         public VehicleRoutingSolution readSolution() throws IOException {
@@ -107,10 +114,11 @@ public class VehicleRoutingImporter extends AbstractTxtSolutionImporter<VehicleR
             BigInteger a = factorial(customerListSize + vehicleListSize - 1);
             BigInteger b = factorial(vehicleListSize - 1);
             BigInteger possibleSolutionSize = (a == null || b == null) ? null : a.divide(b);
-            logger.info("VehicleRoutingSolution {} has {} depots, {} vehicles and {} customers with a search space of {}.",
+            logger.info("VehicleRoutingSolution {} has {} depots, {} vehicles, {} products and {} customers with a search space of {}.",
                     getInputId(),
                     solution.getDepotList().size(),
                     solution.getVehicleList().size(),
+                    solution.getProductList().size(),
                     solution.getCustomerList().size(),
                     getFlooredPossibleSolutionSize(possibleSolutionSize));
             return solution;
@@ -123,13 +131,14 @@ public class VehicleRoutingImporter extends AbstractTxtSolutionImporter<VehicleR
         public void readVrpWebFormat() throws IOException {
             readVrpWebHeaders();
             readVrpWebLocationList();
+            readVrpWebProductList();
             readVrpWebCustomerList();
             readVrpWebDepotList();
             createVrpWebVehicleList();
             readConstantLine("EOF");
         }
 
-        private void readVrpWebHeaders() throws IOException {
+		private void readVrpWebHeaders() throws IOException {
             skipOptionalConstantLines("COMMENT *:.*");
             String vrpType = readStringValue("TYPE *:");
             switch (vrpType) {
@@ -168,6 +177,7 @@ public class VehicleRoutingImporter extends AbstractTxtSolutionImporter<VehicleR
             }
             solution.setDistanceUnitOfMeasurement(readOptionalStringValue("EDGE_WEIGHT_UNIT_OF_MEASUREMENT *:", "distance"));
             capacity = readIntegerValue("CAPACITY *:");
+            productListSize = readIntegerValue("PRODUCTS *:");
         }
 
         private void readVrpWebLocationList() throws IOException {
@@ -291,9 +301,36 @@ public class VehicleRoutingImporter extends AbstractTxtSolutionImporter<VehicleR
             }
             solution.setLocationList(locationList);
         }
+        
+        private void readVrpWebProductList() throws IOException{
+        	readConstantLine("PRODUCT_SECTION");
+        	productList = new ArrayList<>(productListSize);
+        	for (int i = 0; i < productListSize; i++) {
+        		String line = bufferedReader.readLine();
+                String[] lineTokens = splitBySpacesOrTabs(line.trim(), timewindowed ? 5 : 3);
+                long id = Long.parseLong(lineTokens[0]);
+                int boolInt = Integer.parseInt(lineTokens[1]);
+                boolean bool = true;
+                switch (boolInt) {
+                case 0:
+                	bool = false;
+                  break;
+                case 1:
+                	bool = true;
+                  break;
+                default:
+                	throw new IllegalArgumentException("The needsCleaning has to be 0 or 1 and it was : " + boolInt + "%n");
+                }
+                int cleaningCost = Integer.parseInt(lineTokens[2]);
+                Product product = new Product(id, bool, cleaningCost);
+                productList.add(product);
+        	}
+        	solution.setProductList(productList);
+		}
 
         private void readVrpWebCustomerList() throws IOException {
-        	int amountProducts = 4;
+        	// +1 for the id
+        	int amountProducts = productListSize + 1;
             readConstantLine("DEMAND_SECTION");
             depotList = new ArrayList<>(customerListSize);
             List<Customer> customerList = new ArrayList<>(customerListSize);
@@ -383,6 +420,7 @@ public class VehicleRoutingImporter extends AbstractTxtSolutionImporter<VehicleR
                             + ") has a vehicleListSizeString (" + vehicleListSizeString + ") that is not a number.", e);
                 }
             }
+            readCompartimentsList();
             readCapacityList();
             createVehicleList();
         }
@@ -394,12 +432,15 @@ public class VehicleRoutingImporter extends AbstractTxtSolutionImporter<VehicleR
         	
         	for (int i = 0; i < vehicleListSize; i++) {
                 String line = bufferedReader.readLine();
-                String[] lineTokens = splitBySpacesOrTabs(line.trim(), timewindowed ? 5 : 2);
-                long id = Long.parseLong(lineTokens[0]);
-                int capacityVehicle = Integer.parseInt(lineTokens[1]);
+                // + 1 because the id is also read in the capacity section
+                int readCompartiments = compartimentsList.get(i) + 1;
                 
-                    
-                capacityList.add(capacityVehicle);    
+                String[] lineTokens = splitBySpacesOrTabs(line.trim(), timewindowed ? 5 : readCompartiments);
+                long id = Long.parseLong(lineTokens[0]);
+                for(int y = 1; y < readCompartiments; y++) {
+                	int capacityVehicle = Integer.parseInt(lineTokens[y]);  
+                    capacityList.add(capacityVehicle);
+                }
         	}
         	
         }
@@ -407,17 +448,47 @@ public class VehicleRoutingImporter extends AbstractTxtSolutionImporter<VehicleR
         private void createVehicleList() {
             List<Vehicle> vehicleList = new ArrayList<>(vehicleListSize);
             long id = 0;
+            int capacityID = 0;
             for (int i = 0; i < vehicleListSize; i++) {
                 Vehicle vehicle = new Vehicle();
                 vehicle.setId(id);
                 id++;
-                capacity = capacityList.get(i);
-                vehicle.setCapacity(capacity);
+                
+                for (int y = 0; y < compartimentsList.get(i); y++) {
+                	Compartiment compartiment = new Compartiment();
+               	
+               		compartiment.setVehicle(vehicle);
+                	
+               		capacity = capacityList.get(capacityID);
+					compartiment.setCapacity(capacity);
+			
+					vehicle.addToCompartimentsList(compartiment);
+					capacityID++;
+				}
+                
+                
+//                capacity = capacityList.get(i);
+//                vehicle.setCapacity(capacity);
+                
                 // Round robin the vehicles to a depot if there are multiple depots
                 vehicle.setDepot(depotList.get(i % depotList.size()));
                 vehicleList.add(vehicle);
             }
             solution.setVehicleList(vehicleList);
+        }
+        
+        private void readCompartimentsList() throws IOException {
+        	readConstantLine("COMPARTIMENT_SECTION");
+        	
+        	for (int i = 0; i < vehicleListSize; i++) {
+                String line = bufferedReader.readLine();
+                String[] lineTokens = splitBySpacesOrTabs(line.trim(), timewindowed ? 5 : 2);
+                long id = Long.parseLong(lineTokens[0]);
+                int compartiments = Integer.parseInt(lineTokens[1]);
+                
+                compartimentsList.add(compartiments);
+        	}
+        	
         }
 
         // ************************************************************************

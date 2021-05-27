@@ -24,6 +24,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -150,10 +151,18 @@ public class VehicleRoutingSolutionPainter {
             g.setColor(TangoColorFactory.SEQUENCE_2.get(colorIndex));
             Customer vehicleInfoCustomer = null;
             long longestNonDepotDistance = -1L;
-            int load = 0;
+            List<Integer> loadList = new ArrayList<>();
+            for(int x = 0; x < vehicle.getAmountOfCompartiments(); x++) {
+            	loadList.add(0);
+            }
             for (Customer customer : solution.getCustomerList()) {
                 if (customer.getPreviousStandstill() != null && customer.getVehicle() == vehicle) {
-                    load += customer.getDemandTotal();
+                	for(int z = 0; z < customer.getDemandArray().size(); z++) {
+                		if(z < loadList.size()) {
+                			int newLoad = loadList.get(z) + customer.getSpecificDemand(z);
+                            loadList.set(z, newLoad);
+                		}
+                	}
                     Location previousLocation = customer.getPreviousStandstill().getLocation();
                     Location location = customer.getLocation();
                     translator.drawRoute(g, previousLocation.getLongitude(), previousLocation.getLatitude(),
@@ -181,9 +190,11 @@ public class VehicleRoutingSolutionPainter {
             }
             // Draw vehicle info
             if (vehicleInfoCustomer != null) {
-                if (load > vehicle.getCapacity()) {
+            	for(int z = 0; z < loadList.size(); z++) {
+            		if (loadList.get(z) > vehicle.getSpecificCompartimentCapacity(z)) {
                     g.setColor(TangoColorFactory.SCARLET_2);
-                }
+            		}
+            	}
                 Location previousLocation = vehicleInfoCustomer.getPreviousStandstill().getLocation();
                 Location location = vehicleInfoCustomer.getLocation();
                 double longitude = (previousLocation.getLongitude() + location.getLongitude()) / 2.0;
@@ -197,8 +208,11 @@ public class VehicleRoutingSolutionPainter {
                 int vehicleInfoHeight = vehicleImageIcon.getIconHeight() + 2 + TEXT_SIZE;
                 g.drawImage(vehicleImageIcon.getImage(),
                         x + 1, (ascending ? y - vehicleInfoHeight - 1 : y + 1), imageObserver);
-                g.drawString(load + " / " + vehicle.getCapacity(),
-                        x + 1, (ascending ? y - 1 : y + vehicleInfoHeight + 1));
+                for(int z = 0; z < vehicle.getAmountOfCompartiments(); z++) {
+                	g.drawString(loadList.get(z) + " / " + vehicle.getSpecificCompartimentCapacity(z),
+                        x + 1, (ascending ? y - 10*z : y + vehicleInfoHeight + 10*z));
+                }
+                
             }
             colorIndex = (colorIndex + 1) % TangoColorFactory.SEQUENCE_2.size();
         }

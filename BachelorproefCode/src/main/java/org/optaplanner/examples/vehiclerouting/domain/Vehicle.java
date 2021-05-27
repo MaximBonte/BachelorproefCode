@@ -16,6 +16,13 @@
 
 package org.optaplanner.examples.vehiclerouting.domain;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.optaplanner.core.api.domain.entity.PlanningEntity;
+import org.optaplanner.core.api.domain.variable.PlanningVariable;
 import org.optaplanner.examples.common.domain.AbstractPersistable;
 import org.optaplanner.examples.vehiclerouting.domain.location.Location;
 
@@ -24,9 +31,11 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 @XStreamAlias("VrpVehicle")
 public class Vehicle extends AbstractPersistable implements Standstill {
 
-    protected int capacity;
+    //protected int capacity;
     protected Depot depot;
     protected boolean needsCleaning;
+
+    protected List<Compartiment> compartimentsList = new ArrayList<>();
 
     // Shadow variables
     protected Customer nextCustomer;
@@ -34,19 +43,62 @@ public class Vehicle extends AbstractPersistable implements Standstill {
     public Vehicle() {
     }
 
-    public Vehicle(long id, int capacity, Depot depot) {
+    public Vehicle(long id, /*int capacity,*/ Depot depot, List<Compartiment> compartimentsList) {
         super(id);
-        this.capacity = capacity;
+        //this.capacity = capacity;
         this.depot = depot;
+        this.compartimentsList = compartimentsList;
     }
+    
+    public int getSpecificCompartimentCapacity(int i) {
+    	return compartimentsList.get(i).getCapacity();
+    }
+    
+    public void swapCompartiments(int cOne, int cTwo) {
+    	Collections.swap(compartimentsList, cOne, cTwo);
+    }
+    
+    public String getStringCompartimentList() {
+    	StringBuilder sb = new StringBuilder();
+    	for(Compartiment c : compartimentsList){
+    		sb.append(c.getCapacity());
+    		sb.append(", \t");
+    	}
+    	return sb.toString();
+    }
+    
+    public int getAmountOfCompartiments() {
+    	return compartimentsList.size();
+    }
+        
 
-    public int getCapacity() {
-        return capacity;
-    }
+	public boolean isNeedsCleaning() {
+		return needsCleaning;
+	}
 
-    public void setCapacity(int capacity) {
-        this.capacity = capacity;
-    }
+	public void setNeedsCleaning(boolean needsCleaning) {
+		this.needsCleaning = needsCleaning;
+	}
+
+	public List<Compartiment> getCompartimentsList() {
+		return compartimentsList;
+	}
+
+	public void setCompartimentsList(List<Compartiment> compartimentsList) {
+		this.compartimentsList = compartimentsList;
+	}
+
+	public void addToCompartimentsList(Compartiment compartiment) {
+		compartimentsList.add(compartiment);		
+	}
+    
+//    public int getCapacity() {
+//        return capacity;
+//    }
+//
+//    public void setCapacity(int capacity) {
+//        this.capacity = capacity;
+//    }
 
     public Depot getDepot() {
         return depot;
